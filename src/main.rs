@@ -1,81 +1,48 @@
-#[macro_use] extern crate rocket;
+
+#[macro_use] extern crate rocket; 
+#[macro_use] extern crate rocket_dyn_templates;
+extern crate tera;
+
+use std::fs;
+use rocket::fs::FileServer;
+use rocket_dyn_templates::Template;
+use serde::Deserialize;
 
 #[cfg(test)] mod tests;
 
-#[derive(FromFormField)]
-enum Lang {
-    #[field(value = "en")]
-    English,
-    #[field(value = "ru")]
-    #[field(value = "ру")]
-    Russian
+#[derive(Debug, Deserialize)]
+struct Config {
+    file_size: u64,
+    file_lifetime: u64,
 }
 
-#[derive(FromForm)]
-struct Options<'r> {
-    emoji: bool,
-    name: Option<&'r str>,
+fn read_config(file_path: &str) -> Result<Config, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(file_path)?;
+    let config: Config = toml::de::from_str(&content)?;
+    Ok(config)
 }
 
-// Try visiting:
-//   http://127.0.0.1:8000/hello/world
-#[get("/world")]
-fn world() -> &'static str {
-    "Hello, world!"
-}
-
-// Try visiting:
-//   http://127.0.0.1:8000/hello/мир
-#[get("/мир")]
-fn mir() -> &'static str {
-    "Привет, мир!"
-}
-
-// Try visiting:
-//   http://127.0.0.1:8000/wave/Rocketeer/100
-#[get("/<name>/<age>")]
-fn wave(name: &str, age: u8) -> String {
-    format!("👋 Hello, {} year old named {}!", age, name)
-}
-
-// Note: without the `..` in `opt..`, we'd need to pass `opt.emoji`, `opt.name`.
-//
-// Try visiting:
-//   http://127.0.0.1:8000/?emoji
-//   http://127.0.0.1:8000/?name=Rocketeer
-//   http://127.0.0.1:8000/?lang=ру
-//   http://127.0.0.1:8000/?lang=ру&emoji
-//   http://127.0.0.1:8000/?emoji&lang=en
-//   http://127.0.0.1:8000/?name=Rocketeer&lang=en
-//   http://127.0.0.1:8000/?emoji&name=Rocketeer
-//   http://127.0.0.1:8000/?name=Rocketeer&lang=en&emoji
-//   http://127.0.0.1:8000/?lang=ru&emoji&name=Rocketeer
-#[get("/?<lang>&<opt..>")]
-fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
-    let mut greeting = String::new();
-    if opt.emoji {
-        greeting.push_str("👋 ");
+#[get("/")]
+fn index() -> Result<Template, String> {
+    match read_config("config.toml") {
+        Ok(config) => {
+            // Destructure the config to extract values
+            let Config { file_size, file_lifetime } = config;
+            Ok(Template::render("index", context! { filesize: file_size, lifetime: file_lifetime }))
+        },
+        Err(e) => {
+            eprintln!("Error reading config: {}", e);
+            Err(format!("Failed to read config: {}", e)) // Return an error message
+        }
     }
-
-    match lang {
-        Some(Lang::Russian) => greeting.push_str("Привет"),
-        Some(Lang::English) => greeting.push_str("Hello"),
-        None => greeting.push_str("Hi"),
-    }
-
-    if let Some(name) = opt.name {
-        greeting.push_str(", ");
-        greeting.push_str(name);
-    }
-
-    greeting.push('!');
-    greeting
 }
 
 #[launch]
-fn rocket() -> _ {
+fn rocket() -> _ {    
+    //Deserialise values from config.toml and store as values with which to render the home page
+    //Compile templates with max_file_size and max_file_lifetime.                  
     rocket::build()
-        .mount("/", routes![hello])
-        .mount("/hello", routes![world, mir])
-        .mount("/wave", routes![wave])
+        .mount("/", routes![index])
+        .mount("/public", FileServer::from("public"))
+        .attach(Template::fairing())
 }

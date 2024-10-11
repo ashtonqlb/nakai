@@ -1,0 +1,3 @@
+{#TODO: Allow user styling by dropping style.css into root directory.#}
+<link rel=preload href=/public/style.css as=style>
+<link rel=stylesheet href=/public/style.css>

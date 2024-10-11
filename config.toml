@@ -1,0 +1,8 @@
+# General settings
+file_size = 128 # in Megabytes.   0 to disable
+file_lifetime = 360 # in minutes. 0 to disable
+
+# [security]
+# filetype_ban_default_behaviour = 'allowlist' # Choose between allowing certain files or denying certain files
+# allowed_filetypes = [] # The whitelist uses MIME types https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
+# prescan = true # File hash comparison with VirusTotal
