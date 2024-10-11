@@ -16,6 +16,7 @@ struct Config {
     file_lifetime: u64,
 }
 
+//TODO: Move config deserialisation to it's own module.
 fn read_config(file_path: &str) -> Result<Config, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(file_path)?;
     let config: Config = toml::de::from_str(&content)?;
@@ -23,6 +24,8 @@ fn read_config(file_path: &str) -> Result<Config, Box<dyn std::error::Error>> {
 }
 
 #[get("/")]
+//Deserialise values from config.toml and store as values with which to render the home page
+//Compile templates with max_file_size and max_file_lifetime.  
 fn index() -> Result<Template, String> {
     match read_config("config.toml") {
         Ok(config) => {
@@ -39,8 +42,7 @@ fn index() -> Result<Template, String> {
 
 #[launch]
 fn rocket() -> _ {    
-    //Deserialise values from config.toml and store as values with which to render the home page
-    //Compile templates with max_file_size and max_file_lifetime.                  
+              
     rocket::build()
         .mount("/", routes![index])
         .mount("/public", FileServer::from("public"))
