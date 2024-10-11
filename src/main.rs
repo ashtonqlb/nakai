@@ -4,7 +4,7 @@
 extern crate tera;
 
 use std::fs;
-use rocket::fs::FileServer;
+use rocket::{fs::FileServer, route};
 use rocket_dyn_templates::Template;
 use serde::Deserialize;
 
@@ -40,11 +40,16 @@ fn index() -> Result<Template, String> {
     }
 }
 
+#[get("/banned")]
+fn banned() -> Template {
+    Template::render("banned", context!{})
+}
+
 #[launch]
 fn rocket() -> _ {    
               
     rocket::build()
-        .mount("/", routes![index])
+        .mount("/", routes![index, banned])
         .mount("/public", FileServer::from("public"))
         .attach(Template::fairing())
 }
