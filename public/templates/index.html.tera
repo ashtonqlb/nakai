@@ -1,6 +1,5 @@
 {% extends "components/base" %}
 {% block content %}
-    <div class=container>
         <div class=jumbotron>
             <h1>Filehost</h1>
             <p class=lead> 
@@ -11,20 +10,9 @@
                         Files expire after {{lifetime}}.
                 {% endif %}
             </p>
-            <form id=upload-form enctype=multipart/form-data method=post action="upload?output=html"><button
-                    id=upload-btn class=btn type=button>Drop or paste file(s)</button>
+            <form id=upload-form enctype=multipart/form-data method=post action="upload"><button
+                    id=upload-btn class=btn type=button>Drop or paste file</button>
                     {# TODO: Implement filesize checking so the User can't load oversize files into the cache #}
-                    <input type=file id=upload-input name=files[] multiple> <input type=submit value=Submit></form>
-            <ul id=upload-filelist></ul>
+                    <input type=file id=upload-input name=file required> <input type=submit value=Submit></form>
         </div>
-        <footer>
-            <nav>
-                <ul>
-                    <li><a href=/#>API</a>
-                    <li><b>Filehost</b>
-                    <li><a href=https://github.com/ashtonqlb/filehost>Source</a>
-                </ul>
-            </nav>
-        </footer>
-    </div>
 {% endblock content %}

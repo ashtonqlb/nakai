@@ -1,0 +1,10 @@
+
+<footer>
+    <nav>
+        <ul>
+            <li><a href=/#>API</a>
+            <li><a>Filehost</a>
+            <li><a href=https://github.com/ashtonqlb/filehost>Source</a>
+        </ul>
+    </nav>
+</footer>

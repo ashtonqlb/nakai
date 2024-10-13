@@ -1,55 +1,52 @@
+#[macro_use]
+extern crate rocket;
+mod uuid;
+#[cfg(test)]
+mod tests;
+use std::io;
 
-#[macro_use] extern crate rocket; 
-#[macro_use] extern crate rocket_dyn_templates;
-extern crate tera;
+// use fh_config::config::{read_config, Config};
+use rocket::data::{Data, ToByteUnit};
+use rocket::fs::FileServer;
+use rocket::http::uri::Absolute;
+use rocket::response::content::RawText;
+use rocket::tokio::fs::{self, File};
 
-use std::fs;
-use rocket::{fs::FileServer, route};
-use rocket_dyn_templates::Template;
-use serde::Deserialize;
+use uuid::FileID;
+use rocket_dyn_templates::{context, Template};
 
-#[cfg(test)] mod tests;
+// In a real application, these would be retrieved dynamically from a config.
+const HOST: Absolute<'static> = uri!("http://localhost:8000");
 
-#[derive(Debug, Deserialize)]
-struct Config {
-    file_size: u64,
-    file_lifetime: u64,
+#[post("/", data = "<file>")]
+async fn upload(file: Data<'_>) -> io::Result<String> {
+    let id = FileID::new();
+    file
+        .open(128.kibibytes())
+        .into_file(id.file_path())
+        .await?;
+    Ok(uri!(HOST, retrieve(id)).to_string())
 }
 
-//TODO: Move config deserialisation to it's own module.
-fn read_config(file_path: &str) -> Result<Config, Box<dyn std::error::Error>> {
-    let content = fs::read_to_string(file_path)?;
-    let config: Config = toml::de::from_str(&content)?;
-    Ok(config)
+#[get("/<id>")]
+async fn retrieve(id: FileID<'_>) -> Option<RawText<File>> {
+    File::open(id.file_path()).await.map(RawText).ok()
+}
+
+#[delete("/<id>")]
+async fn delete(id: FileID<'_>) -> Option<()> {
+    fs::remove_file(id.file_path()).await.ok()
 }
 
 #[get("/")]
-//Deserialise values from config.toml and store as values with which to render the home page
-//Compile templates with max_file_size and max_file_lifetime.  
-fn index() -> Result<Template, String> {
-    match read_config("config.toml") {
-        Ok(config) => {
-            // Destructure the config to extract values
-            let Config { file_size, file_lifetime } = config;
-            Ok(Template::render("index", context! { filesize: file_size, lifetime: file_lifetime }))
-        },
-        Err(e) => {
-            eprintln!("Error reading config: {}", e);
-            Err(format!("Failed to read config: {}", e)) // Return an error message
-        }
-    }
-}
-
-#[get("/banned")]
-fn banned() -> Template {
-    Template::render("banned", context!{})
+fn index() -> Template {
+    Template::render("index", context! { filesize: 64, lifetime: 128 })
 }
 
 #[launch]
-fn rocket() -> _ {    
-              
+fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, banned])
+        .mount("/", routes![index, upload, delete, retrieve])
         .mount("/public", FileServer::from("public"))
         .attach(Template::fairing())
 }

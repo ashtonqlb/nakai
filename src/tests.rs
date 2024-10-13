@@ -1,71 +1,81 @@
+use super::{rocket, FileID};
 use rocket::local::blocking::Client;
-use rocket::http::{RawStr, Status};
+use rocket::http::{Status, ContentType};
+use rocket::request::FromParam;
 
-#[test]
-fn hello() {
-    let langs = &["", "ru", "%D1%80%D1%83", "en", "unknown"];
-    let ex_lang = &["Hi", "Привет", "Привет", "Hello", "Hi"];
+fn extract_id(from: &str) -> Option<String> {
+    from.rfind('/').map(|i| &from[(i + 1)..]).map(|s| s.trim_end().to_string())
+}
 
-    let emojis = &["", "on", "true", "false", "no", "yes", "off"];
-    let ex_emoji = &["", "👋 ", "👋 ", "", "", "👋 ", ""];
+fn upload_paste(client: &Client, body: &str) -> String {
+    let response = client.post(uri!(super::upload)).body(body).dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    assert_eq!(response.content_type(), Some(ContentType::Plain));
+    extract_id(&response.into_string().unwrap()).unwrap()
+}
 
-    let names = &["", "Bob", "Bob+Smith"];
-    let ex_name = &["!", ", Bob!", ", Bob Smith!"];
-
-    let client = Client::tracked(super::rocket()).unwrap();
-    for n in 0..(langs.len() * emojis.len() * names.len()) {
-        let i = n / (emojis.len() * names.len());
-        let j = n % (emojis.len() * names.len()) / names.len();
-        let k = n % (emojis.len() * names.len()) % names.len();
-
-        let (lang, ex_lang) = (langs[i], ex_lang[i]);
-        let (emoji, ex_emoji) = (emojis[j], ex_emoji[j]);
-        let (name, ex_name) = (names[k], ex_name[k]);
-        let expected = format!("{}{}{}", ex_emoji, ex_lang, ex_name);
-
-        let q = |name, s: &str| match s.is_empty() {
-            true => "".into(),
-            false => format!("&{}={}", name, s)
-        };
-
-        let uri = format!("/?{}{}{}", q("lang", lang), q("emoji", emoji), q("name", name));
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.into_string().unwrap(), expected);
-
-        let uri = format!("/?{}{}{}", q("emoji", emoji), q("name", name), q("lang", lang));
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.into_string().unwrap(), expected);
+fn download_paste(client: &Client, id: &str) -> Option<String> {
+    let id = FileID::from_param(id).expect("valid ID");
+    let response = client.get(uri!(super::retrieve(id))).dispatch();
+    if response.status().class().is_success() {
+        Some(response.into_string().unwrap())
+    } else {
+        None
     }
 }
 
-#[test]
-fn hello_world() {
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/hello/world").dispatch();
-    assert_eq!(response.into_string(), Some("Hello, world!".into()));
+fn delete_paste(client: &Client, id: &str) {
+    let id = FileID::from_param(id).expect("valid ID");
+    let response = client.delete(uri!(super::delete(id))).dispatch();
+    assert_eq!(response.status(), Status::Ok);
 }
 
 #[test]
-fn hello_mir() {
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/hello/%D0%BC%D0%B8%D1%80").dispatch();
-    assert_eq!(response.into_string(), Some("Привет, мир!".into()));
-}
+fn pasting() {
+    let client = Client::tracked(rocket()).unwrap();
 
-#[test]
-fn wave() {
-    let client = Client::tracked(super::rocket()).unwrap();
-    for &(name, age) in &[("Bob%20Smith", 22), ("Michael", 80), ("A", 0), ("a", 127)] {
-        let uri = format!("/wave/{}/{}", name, age);
-        let real_name = RawStr::new(name).percent_decode_lossy();
-        let expected = format!("👋 Hello, {} year old named {}!", age, real_name);
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.into_string().unwrap(), expected);
+    // Do a trivial upload, just to make sure it works.
+    let body_1 = "Hello, world!";
+    let id_1 = upload_paste(&client, body_1);
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
 
-        for bad_age in &["1000", "-1", "bird"] {
-            let bad_uri = format!("/wave/{}/{}", name, bad_age);
-            let response = client.get(bad_uri).dispatch();
-            assert_eq!(response.status(), Status::UnprocessableEntity);
-        }
-    }
+    // Make sure we can keep getting that paste.
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+
+    // Upload some unicode.
+    let body_2 = "こんにちは";
+    let id_2 = upload_paste(&client, body_2);
+    assert_eq!(download_paste(&client, &id_2).unwrap(), body_2);
+
+    // Make sure we can get both pastes.
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+    assert_eq!(download_paste(&client, &id_2).unwrap(), body_2);
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+    assert_eq!(download_paste(&client, &id_2).unwrap(), body_2);
+
+    // Now a longer upload.
+    let body_3 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
+        do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+        ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+        in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum.";
+
+    let id_3 = upload_paste(&client, body_3);
+    assert_eq!(download_paste(&client, &id_3).unwrap(), body_3);
+    assert_eq!(download_paste(&client, &id_1).unwrap(), body_1);
+    assert_eq!(download_paste(&client, &id_2).unwrap(), body_2);
+
+    // Delete everything we uploaded.
+    delete_paste(&client, &id_1);
+    assert!(download_paste(&client, &id_1).is_none());
+
+    delete_paste(&client, &id_2);
+    assert!(download_paste(&client, &id_2).is_none());
+
+    delete_paste(&client, &id_3);
+    assert!(download_paste(&client, &id_3).is_none());
 }
