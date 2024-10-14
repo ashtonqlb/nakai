@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'filehost'",
+            "name": "Debug executable 'hostess'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=filehost",
-                    "--package=filehost"
+                    "--bin=hostess",
+                    "--package=hostess"
                 ],
                 "filter": {
-                    "name": "filehost",
+                    "name": "hostess",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'filehost'",
+            "name": "Debug unit tests in executable 'hostess'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=filehost",
-                    "--package=filehost"
+                    "--bin=hostess",
+                    "--package=hostess"
                 ],
                 "filter": {
-                    "name": "filehost",
+                    "name": "hostess",
                     "kind": "bin"
                 }
             },
