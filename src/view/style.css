@@ -5,10 +5,10 @@
 }
 body {
   background-color: #f7f7f7;
-  background-image: url(img/bg.png);
+  /* background-image: url(img/bg.png);
   @supports (background-image: url("img/bg.avif")) {
-    background-image: url(img/bg.avif);
-  }
+  background-image: url(img/bg.avif);
+  } */
   background-position: 0 0;
   background-repeat: repeat;
   color: #333;

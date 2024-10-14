@@ -2,7 +2,7 @@
 [default]
 address = "0.0.0.0"
 limits = { form = "64 kB", json = "1 MiB" }
-template_dir = "public/templates"
+template_dir = "src/view/templates/"
 
 ## set only when compiled in debug mode, i.e, `cargo build`
 [debug]

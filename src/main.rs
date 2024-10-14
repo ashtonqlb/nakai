@@ -1,52 +1,32 @@
+mod core;
+mod db;
+mod model;
+mod route;
+
 #[macro_use]
 extern crate rocket;
-mod uuid;
-#[cfg(test)]
-mod tests;
-use std::io;
 
-// use fh_config::config::{read_config, Config};
-use rocket::data::{Data, ToByteUnit};
+// #[cfg(test)]
+// use std::io;
+
 use rocket::fs::FileServer;
-use rocket::http::uri::Absolute;
-use rocket::response::content::RawText;
-use rocket::tokio::fs::{self, File};
-
-use uuid::FileID;
-use rocket_dyn_templates::{context, Template};
-
-// In a real application, these would be retrieved dynamically from a config.
-const HOST: Absolute<'static> = uri!("http://localhost:8000");
-
-#[post("/", data = "<file>")]
-async fn upload(file: Data<'_>) -> io::Result<String> {
-    let id = FileID::new();
-    file
-        .open(128.kibibytes())
-        .into_file(id.file_path())
-        .await?;
-    Ok(uri!(HOST, retrieve(id)).to_string())
-}
-
-#[get("/<id>")]
-async fn retrieve(id: FileID<'_>) -> Option<RawText<File>> {
-    File::open(id.file_path()).await.map(RawText).ok()
-}
-
-#[delete("/<id>")]
-async fn delete(id: FileID<'_>) -> Option<()> {
-    fs::remove_file(id.file_path()).await.ok()
-}
-
-#[get("/")]
-fn index() -> Template {
-    Template::render("index", context! { filesize: 64, lifetime: 128 })
-}
+use rocket_dyn_templates::Template;
 
 #[launch]
 fn rocket() -> _ {
+    let _ = dotenvy::dotenv(); //TODO: Wrap this in it's own -> Result function rather than have this ugly Thing.
+
     rocket::build()
-        .mount("/", routes![index, upload, delete, retrieve])
-        .mount("/public", FileServer::from("public"))
+        .attach(db::init())
         .attach(Template::fairing())
+        .mount("/public", FileServer::from("src/view"))
+        .mount(
+            "/",
+            routes![
+                route::index,
+                route::file::upload,
+                route::file::delete,
+                route::file::retrieve
+            ],
+        )
 }
