@@ -12,10 +12,17 @@ extern crate rocket;
 use rocket::fs::FileServer;
 use rocket_dyn_templates::Template;
 
+fn load_env() -> Result<(), Box<dyn std::error::Error>> {
+    dotenvy::dotenv()?;
+    Ok(())
+}
 #[launch]
 fn rocket() -> _ {
-    let _ = dotenvy::dotenv(); //TODO: Wrap this in it's own -> Result function rather than have this ugly Thing.
-
+    match load_env() {
+        Ok(_) => println!(".env loaded successfully."),
+        Err(e) => eprintln!("Failed to load environment variables: {}", e),
+    }
+    
     rocket::build()
         .attach(db::init())
         .attach(Template::fairing())

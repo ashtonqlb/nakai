@@ -10,7 +10,7 @@
         Files expire after {{lifetime}}.
         {% endif %}
     </p>
-    <form id=upload-form enctype=multipart/form-data method=post action="upload">
+    <form id=upload-form method=post action="/upload" enctype=multipart/form-data >
         <button id=upload-btn class=btn type=button>Drop or paste file</button>
         <input type=file id=upload-input name=file required> <input type=submit value=Submit>
     </form>
