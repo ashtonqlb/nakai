@@ -1,14 +1,19 @@
 [package]
-name = "filehost"
+name = "hostess"
 version = "0.1.0"
 edition = "2021"
 
+[build]
+rustflags = ["--cfg", "no_windows"]
+
 [dependencies]
+bson = {version = "2.13.0", features = ["chrono-0_4"]}
+chrono = {version = "0.4.38",features = ["serde"] } 
+dotenvy = "0.15.7"
+mongodb = "3.1.0"
 rocket = "0.5.1"
 rocket_dyn_templates = {version = "0.2.0", features = ["tera"]}
 serde = "1.0.210"
 tera = "1.20.0"
 toml = "0.8.19"
-uuid = "1.10.0"
-
-[features]
+uuid = "1.10.0" 
