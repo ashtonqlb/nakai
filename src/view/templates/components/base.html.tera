@@ -1,21 +1,19 @@
 <!doctype html>
-<html lang=en>
+<html lang="en">
 
 <head>
-    <meta charset=utf-8>
-    <meta name=viewport content="width=device-width,initial-scale=1">
-    <meta name=generator content="Filehost 0.0.1">
-    <meta name=description
-        content="A simple-to-use free temporary file hosting service. It lets you share your photos, documents, music, videos and more with others online with no ads, account sign-up or tracking.">
-    <title>Filehost &middot; Temporary file hosting</title>
-    <link rel="shortcut icon" href="/public/assets/favicon.png" type="image/png">
-    {% include "components/styles" %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hostess is a simple-to-use, free file hosting service.">
+  <title>Hostess · Simple file hosting</title>
+  <link rel="icon" type="image/png" href="/public/static/images/favicon.ico">
+  <link rel="stylesheet" href="public/static/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+  <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 </head>
 
 <body>
-    <div class=container>
-        {% block content %}
-        {% endblock content %}
-        {% include "components/footer"%}
-    </div>
+  {% block content %}
+  {% endblock content %}
+  <script type="module" src="public/static/js/hostess.js"></script>
 </body>

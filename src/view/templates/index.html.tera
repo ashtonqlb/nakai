@@ -1,18 +1,23 @@
 {% extends "components/base" %}
 {% block content %}
-<div class=jumbotron>
-    <h1>仲居</h1>
-    <p class=lead>
-        {% if filesize %}
-        Max upload size is {{filesize}}.
-        {% endif %}
-        {% if lifetime %}
-        Files expire after {{lifetime}}.
-        {% endif %}
-    </p>
-    <form id=upload-form method=post action="/upload" enctype=multipart/form-data >
-        <button id=upload-btn class=btn type=button>Drop or paste file</button>
-        <input type=file id=upload-input name=file required> <input type=submit value=Submit>
+<div class="card">
+    <h1 class="jumbotron">仲居</h1>
+    <p class="lead">Max upload size is <b>64 MiB</b> &amp; files expire after <b>6 hours.</b></p>
+    <br>
+    <form class=dropzone method=post action="/upload" enctype=multipart/form-data id="upload-form">
+        <div class="fallback">
+            <input name="file" type="file" multiple />
+        </div>
     </form>
+    <br>
+    <nav>
+        <ul>
+            <li><a href="/#">API</a></li>
+            <li><a href="/#">FAQ</a></li>
+            <li><b><a href="/#">Hostess</a></b></li>
+            <li><a href="/#">Legal</a></li>
+            <li><a href="https://github.com/ashtonqlb/nakai">Source</a></li>
+        </ul>
+    </nav>
 </div>
 {% endblock content %}

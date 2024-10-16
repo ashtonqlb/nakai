@@ -24,6 +24,5 @@ Cargo.lock
 .env
 
 # Prevent distribution of copyrighted materials.
-src/view/static/images
 override/*
 upload/

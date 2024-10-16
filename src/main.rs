@@ -16,13 +16,14 @@ fn load_env() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv()?;
     Ok(())
 }
+
 #[launch]
 fn rocket() -> _ {
     match load_env() {
         Ok(_) => println!(".env loaded successfully."),
         Err(e) => eprintln!("Failed to load environment variables: {}", e),
     }
-    
+
     rocket::build()
         .attach(db::init())
         .attach(Template::fairing())
