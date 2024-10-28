@@ -1,2 +1,1 @@
-# Hostess
-## Legally Distinct from Pomf!
+# Hostess - A Modern, fast Pomf clone.
