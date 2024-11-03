@@ -1,28 +1,39 @@
-// use mongodb::bson::{doc, Document};
-use mongodb::{options::ClientOptions, Client, Database};
-use rocket::fairing::AdHoc;
-use std::env;
+use async_trait::async_trait;
+use sea_orm::ConnectOptions;
+use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
+use std::time::Duration;
 
-pub fn init() -> AdHoc {
-    AdHoc::on_ignite("Connecting to MongoDB", |rocket| async {
-        match connect().await {
-            Ok(database) => rocket.manage(database),
-            Err(error) => {
-                panic!("Cannot connect to instance:: {:?}", error)
-            }
-        }
-    })
+#[derive(Database, Debug)]
+#[database("sea_orm")]
+pub struct Db(SeaOrmPool);
+
+#[derive(Debug, Clone)]
+pub struct SeaOrmPool {
+    pub conn: sea_orm::DatabaseConnection,
 }
 
-async fn connect() -> mongodb::error::Result<Database> {
-    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI is not found.");
-    let mongo_db_name = env::var("MONGO_DB_NAME").expect("MONGO_DB_NAME is not found.");
+#[async_trait]
+impl sea_orm_rocket::Pool for SeaOrmPool {
+    type Error = sea_orm::DbErr;
+    type Connection = sea_orm::DatabaseConnection;
 
-    let client_options = ClientOptions::parse(mongo_uri).await?;
-    let client = Client::with_options(client_options)?;
-    let database = client.database(mongo_db_name.as_str());
+    async fn init(figment: &Figment) -> Result<Self, Self::Error> {
+        let config = figment.extract::<Config>().unwrap();
+        let mut options: ConnectOptions = config.url.into();
+        options
+            .max_connections(config.max_connections as u32)
+            .min_connections(config.min_connections.unwrap_or_default())
+            .connect_timeout(Duration::from_secs(config.connect_timeout))
+            .sqlx_logging(config.sqlx_logging);
+        if let Some(idle_timeout) = config.idle_timeout {
+            options.idle_timeout(Duration::from_secs(idle_timeout));
+        }
+        let conn = sea_orm::Database::connect(options).await?;
 
-    println!("MongoDB Connected!");
+        Ok(SeaOrmPool { conn })
+    }
 
-    Ok(database)
+    fn borrow(&self) -> &Self::Connection {
+        &self.conn
+    }
 }
