@@ -1,9 +1,0 @@
-## defaults for _all_ profiles
-[default]
-address = "0.0.0.0"
-port = 8000
-template_dir = "src/view/templates/"
-
-[default.limits]
-form = "64kb"
-json = "1MiB"

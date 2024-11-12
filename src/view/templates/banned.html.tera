@@ -1,7 +1,0 @@
-{% extends "components/base" %}
-{% block content %}
-    <div class=jumbotron>
-        <img src="public/static/images/banned.webp" style="height:300px">
-        <p class="lead">You are banned!</p>
-    </div>
-{% endblock content %}
