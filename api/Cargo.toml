@@ -1,0 +1,21 @@
+[package]
+name = "hostess-api"
+version = "0.1.0"
+authors = ["Ashton L. <ashton@spysat.net>", "Josie E."]
+edition = "2021"
+publish = false
+
+[dependencies]
+hostess-service = { path = "../service" }
+actix-files = "0.6.6"
+actix-http = "3.9"
+actix-rt = "2.10"
+actix-service = "2.0.2"
+actix-web = "4.9"
+tera = "1.20.0"
+dotenvy = "0.15"
+listenfd = "1"
+serde = "1"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+entity = { path = "../entity" }
+migration = { path = "../migration" }

@@ -1,4 +1,4 @@
-{% extends "components/base" %}
+{% extends "base.html.tera" %}
 {% block content %}
 {# TODO: Implement file previews for text and images, and allow threaded downloading of videos #}
 <nav>

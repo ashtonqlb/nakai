@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Hostess is a simple-to-use, free file hosting service.">
   <title>Hostess · Simple file hosting</title>
-  <link rel="icon" type="image/png" href="/public/static/images/favicon.ico">
-  <link rel="stylesheet" href="public/static/css/style.css">
+  <link rel="icon" type="image/png" href="/static/images/favicon.ico">
+  <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
   <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 </head>
@@ -15,5 +15,5 @@
 <body>
   {% block content %}
   {% endblock content %}
-  <script type="module" src="public/static/js/hostess.js"></script>
+  <script type="module" src="/static/js/hostess.js"></script>
 </body>

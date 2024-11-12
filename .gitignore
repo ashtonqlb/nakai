@@ -22,7 +22,9 @@ Cargo.lock
 
 # No peeking!
 .env
+.vscode/settings.json
 
 # Prevent distribution of copyrighted materials.
 override/*
 upload/
+
