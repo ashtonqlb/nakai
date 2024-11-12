@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hostess is a simple-to-use, free file hosting service.">
+  <title>Hostess · Simple file hosting</title>
+  <link rel="icon" type="image/png" href="/static/images/favicon.ico">
+  {# <link rel="preload" href="/static/css/style.css" as="style">
+  <link rel="stylesheet" href="/static/css/style.css"> #}
+  {# TODO: Figure out why Stylesheets don't load properly on Chromium #}
+  <style>
+    @font-face {
+      font-family: "Atkinson Hyperlegible";
+      src: url("static/fonts/atkinson-hyperlegible-regular.woff2") format("woff2");
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: "Atkinson Hyperlegible";
+      src: url("static/fonts/atkinson-hyperlegible-bold.woff2") format("woff2");
+      font-weight: bold;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: "Atkinson Hyperlegible";
+      src: url("static/fonts/atkinson-hyperlegible-italic.woff2") format("woff2");
+      font-weight: normal;
+      font-style: italic;
+    }
+    
+    :root {
+      /* Light Mode */
+      --bg-color: gainsboro;
+      --card-bg: white;
+      --text-color: black;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --accent: #CCE8ED;
+    }
+    
+    [data-theme="dark"] {
+      /* Dark Mode */
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: white;
+      --shadow-color: rgba(255, 255, 255, 0.1);
+      --accent: purple;
+    }
+    
+    body {
+      font-family: "Atkinson Hyperlegible", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 50vh;
+      margin: 0;
+      padding-top: 50px;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      background-image: repeating-linear-gradient(
+          45deg,
+          rgba(0, 0, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0.1) 1px,
+          transparent 1px,
+          transparent 50%
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          rgba(0, 0, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0.1) 1px,
+          transparent 1px,
+          transparent 50%
+        );
+      background-size: 10px 10px;
+      background-blend-mode: overlay;
+    }
+    
+    nav {
+      display: flex;
+      justify-content: center; /* Center the nav items */
+      text-align: center;
+      align-items: baseline; /* Align items vertically */
+    }
+    
+    nav a {
+      transition: 200ms;
+      color: var(--text-color); /* Default link color */
+      text-decoration: none; /* Remove underline */
+    }
+    
+    nav a:hover {
+      transition: 200ms;
+      color: var(--accent); /* Change color on hover */
+    }
+    
+    nav ul {
+      width: 100%;
+      height: 100%;
+      display: inline-flex; /* Use flexbox for the list */
+      list-style-type: none;
+      margin: 10px 0 0 0;
+      justify-content: center;
+    }
+    
+    nav ul li {
+      display: inline;
+      margin-right: 15px;
+      position: relative; /* For the separator */
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px var(--shadow-color);
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      margin: 0 30px;
+    }
+    
+    .lead {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    
+    .jumbotron {
+      font-size: 72px;
+      margin: 10px 10px 10px 10px;
+    }
+    
+    form.dz-clickable {
+      border: 2px solid #396B84;
+      border-radius: 4px;
+      background-color: var(--accent);
+      cursor: pointer;
+      padding-bottom: 25px;
+    }
+    
+    div.dz-default {
+      color: #28538F;
+      cursor: pointer;
+      font-size: 24px;
+      font-weight: 400;
+      margin-top: 30px;
+    }
+    
+    div.dz-message {
+      font-size: 24px;
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 600px) {
+      body {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+    
+      .card {
+        margin: 0 10px;
+        height: 100%;
+      }
+    
+      .theme-toggle-card {
+        left: 20px;
+      }
+    
+      .jumbotron {
+        font-size: 36px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+  <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+</head>
+
+<body>
+  {% block content %}
+  {% endblock content %}
+  <script type="module" src="/static/js/hostess.js"></script>
+</body>

@@ -9,14 +9,14 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Files::Table)
+                    .table(File::Table)
                     .if_not_exists()
-                    .col(pk_auto(Files::Id))
-                    .col(string(Files::Name))
-                    .col(date(Files::Date))
-                    .col(string(Files::Hash))
-                    .col(integer(Files::IP))
-                    .col(integer(Files::Size))
+                    .col(pk_auto(File::Id))
+                    .col(string(File::Name))
+                    .col(date(File::Date))
+                    .col(string(File::Hash))
+                    .col(integer(File::IP))
+                    .col(integer(File::Size))
                     .to_owned(),
             )
             .await?;
@@ -75,7 +75,7 @@ enum Posts {
 }
 
 #[derive(DeriveIden)]
-enum Files {
+enum File {
     Table,
     Id,
     Name,

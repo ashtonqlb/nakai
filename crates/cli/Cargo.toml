@@ -1,0 +1,9 @@
+[package]
+name = "hostess-cli"
+version = "0.1.0"
+authors = ["Ashton L. <ashton@spysat.net>", "Josie E."]
+edition = "2021"
+publish = false
+
+[dependencies]
+dotenvy = "0.15"

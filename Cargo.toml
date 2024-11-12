@@ -10,7 +10,8 @@ edition = "2021"
 publish = false
 
 [workspace]
-members = ["api", "service", "entity", "migration"]
+members = ["crates/api", "crates/service", "crates/entity", "crates/migration", "crates/cli"]
 
 [dependencies]
-hostess-api = { path = "api" }
+hostess-api = { path = "crates/api" }
+tree_magic_mini = "3.1.6"

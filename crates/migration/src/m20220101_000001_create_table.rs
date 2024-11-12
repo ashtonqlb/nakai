@@ -33,7 +33,7 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum Files {
+enum File {
     Table,
     Id,
     Filename,

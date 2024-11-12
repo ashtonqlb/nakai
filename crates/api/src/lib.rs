@@ -1,11 +1,11 @@
+use entity::file;
 use hostess_service::{
-    sea_orm::{Database, DatabaseConnection},
-    // Mutation, Query,
+    sea_orm::{Database, DatabaseConnection}, Mutation,
 };
 
 use actix_files::Files as Fs;
 use actix_web::{
-    error, get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Result,
+    error, get, middleware, post, web, App, Error, HttpRequest, HttpResponse, HttpServer, Result
 };
 
 // use entity::files;
@@ -15,12 +15,12 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use tera::Tera;
 
-
 #[derive(Debug, Clone)]
 struct AppState {
     templates: tera::Tera,
     conn: DatabaseConnection,
 }
+
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct FlashData {
     kind: String,
@@ -34,10 +34,22 @@ async fn index(data: web::Data<AppState>, request: HttpRequest) -> Result<HttpRe
 
     let template = &data.templates;
     let body = template
-        .render("index.html.tera", &ctx)
+        .render("components/index.html.tera", &ctx)
         .map_err(|_| error::ErrorInternalServerError("Template error"))?;
 
     Ok(HttpResponse::Ok().content_type("text/html").body(body))
+}
+
+#[post("/")]
+async fn create(data: web::Data<AppState>, file_form: web::Form<files::Model>) -> Result<HttpResponse, Error> {
+    let conn = &data.conn;
+    let form = file_form.into_inner();
+
+    Mutation::create_file(conn, form).await.expect("Could not upload file!");
+
+    Ok(HttpResponse::Found()
+        .append_header(("location", "/"))
+        .finish())
 }
 
 async fn not_found(data: web::Data<AppState>, request: HttpRequest) -> Result<HttpResponse, Error> {
@@ -46,7 +58,7 @@ async fn not_found(data: web::Data<AppState>, request: HttpRequest) -> Result<Ht
 
     let template = &data.templates;
     let body = template
-        .render("error/404.html.tera", &ctx)
+        .render("components/error/404.html.tera", &ctx)
         .map_err(|_| error::ErrorInternalServerError("Template error"))?;
 
     Ok(HttpResponse::Ok().content_type("text/html").body(body))
@@ -76,7 +88,7 @@ async fn start() -> std::io::Result<()> {
     let mut listenfd = ListenFd::from_env();
     let mut server = HttpServer::new(move || {
         App::new()
-            .service(Fs::new("/static", "./api/static"))
+            .service(Fs::new("/static", "./crates/api/static"))
             .app_data(web::Data::new(state.clone()))
             .wrap(middleware::Logger::default()) // enable logger
             .default_service(web::route().to(not_found))
@@ -87,10 +99,8 @@ async fn start() -> std::io::Result<()> {
         Some(listener) => server.listen(listener)?,
         None => server.bind(&server_url)?,
     };
-
-    println!("Starting server at {server_url}");
+    println!("Starting Hostess server at {server_url}\n");
     server.run().await?;
-
     Ok(())
 }
 

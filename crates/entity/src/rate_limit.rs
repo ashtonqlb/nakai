@@ -8,7 +8,7 @@ pub struct Model {
     #[serde(skip_deserializing)]
     pub id: i32,
     pub iphash: String,
-    pub files: String,
+    pub file: String,
     pub date: DateTimeUtc,
 }
 

@@ -1,10 +1,10 @@
-use ::entity::{files, files::Entity as File};
+use ::entity::{file, file::Entity as File};
 use sea_orm::*;
 
 pub struct Query;
 
 impl Query {
-    pub async fn find_post_by_id(db: &DbConn, id: i32) -> Result<Option<files::Model>, DbErr> {
+    pub async fn find_file_by_id(db: &DbConn, id: i32) -> Result<Option<file::Model>, DbErr> {
         File::find_by_id(id).one(db).await
     }
 
